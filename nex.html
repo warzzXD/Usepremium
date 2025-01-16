@@ -1,0 +1,33 @@
+<html>
+<head>
+    <title>Loading Page</title>
+    <style>
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+        }
+
+        .blinking {
+            animation: blink 1s infinite;
+        }
+    </style>
+</head>
+<body>
+ <audio autoplay="true" src="vil.mp3" type="audio/mp3" loop></audio>
+    <div class="blinking">TERIMA KASIH 😘</div>
+</body>
+</html>
